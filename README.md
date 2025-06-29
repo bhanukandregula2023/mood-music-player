@@ -55,8 +55,7 @@ Then visit `http://localhost:8000` in your browser.
 
 ## 🌐 Live Demo
 
-[Live Preview](https://bhanukandregula2023.github.io/mood-music-player/) *(Update this after deploying)*
-
+[Live Preview](https://bhanukandregula2023.github.io/mood-music-player/) 
 ---
 
 ## 📦 Deployment
