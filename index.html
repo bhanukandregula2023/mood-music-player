@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood-Based Music Player</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-light: #f6d365;
+      --bg-dark: #4C5958;
+      --text-light: #fff;
+      --text-dark: #ddd;
+      --card-light: #232526;
+      --card-dark: #333;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(-45deg, #042940, #005C53, #042940, #005C53);
+      background-size: 400% 400%;
+      animation: animatedGradient 15s ease infinite, fadeIn 2s ease-in-out;
+      transition: background 1s ease-in-out, color 0.5s ease-in-out;
+      color: var(--text-light);
+    }
+
+    body.dark-mode {
+      background: linear-gradient(-45deg, #232526, #414345, #2c3e50, #4b6cb7);
+      background-size: 400% 400%;
+      color: var(--text-dark);
+    }
+
+    @keyframes animatedGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 30px;
+      animation: slideDown 1s ease-out;
+    }
+
+    label, select, button {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    select, button {
+      background-color: #589A8D;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    body.dark-mode select,
+    body.dark-mode button {
+      background-color: var(--card-dark);
+      color: var(--text-dark);
+    }
+
+    select:hover, button:hover {
+      transform: translateY(-2px);
+      background-color: #f0f0f0;
+    }
+
+    #mood {
+      font-size: 26px;
+      margin-top: 30px;
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 0.5s;
+    }
+
+    #emoji {
+      font-size: 60px;
+      margin-top: 15px;
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 0.7s;
+    }
+
+    #controls {
+      margin-top: 30px;
+    }
+
+    audio {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 10px;
+      background-color: var(--card-light);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .dark-mode audio {
+      background-color: var(--card-dark);
+    }
+
+    #darkModeToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      transition: color 0.3s ease;
+    }
+
+    .dark-mode #darkModeToggle {
+      color: var(--text-dark);
+    }
+
+    #currentSong {
+      margin-top: 10px;
+      font-size: 16px;
+      font-style: italic;
+      opacity: 0.85;
+    }
+
+    .bars {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 20px;
+      height: 30px;
+    }
+
+    .bars span {
+      display: inline-block;
+      width: 6px;
+      height: 100%;
+      background-color: #00ffaa;
+      animation: bounce 1s infinite ease-in-out;
+    }
+
+    .bars span:nth-child(2) { animation-delay: 0.2s; }
+    .bars span:nth-child(3) { animation-delay: 0.4s; }
+    .bars span:nth-child(4) { animation-delay: 0.6s; }
+    .bars span:nth-child(5) { animation-delay: 0.8s; }
+
+    @keyframes bounce {
+      0%, 100% { transform: scaleY(0.3); }
+      50% { transform: scaleY(1); }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2em; }
+      select, button { width: 80%; font-size: 16px; }
+      #emoji { font-size: 48px; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <button id="darkModeToggle" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button>
+
+  <h1><i class="fas fa-music"></i> Mood-Based Music Player</h1>
+
+  <label for="moodSelect">Select your mood:</label>
+  <br>
+  <select id="moodSelect">
+    <option value="happy">Happy</option>
+    <option value="sad">Sad</option>
+    <option value="angry">Angry</option>
+    <option value="relaxed">Relaxed</option>
+    <option value="neutral">Neutral</option>
+  </select>
+
+  <div id="mood">No mood selected</div>
+  <div id="emoji"></div>
+  <div id="controls">
+    <button onclick="playSelectedMood()"><i class="fas fa-play"></i> Play Music</button>
+    <button onclick="playNextSong()"><i class="fas fa-forward"></i> Next</button>
+    <button onclick="playPreviousSong()"><i class="fas fa-backward"></i> Previous</button>
+  </div>
+
+  <div id="currentSong">No song playing</div>
+  
+  <div id="nowPlayingAnimation" class="bars hidden">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <audio id="audio" controls></audio>
+
+  <script>
+    const moodSelect = document.getElementById('moodSelect');
+    const moodDisplay = document.getElementById('mood');
+    const emojiDisplay = document.getElementById('emoji');
+    const currentSongDisplay = document.getElementById('currentSong');
+    const nowPlayingAnimation = document.getElementById('nowPlayingAnimation');
+    const audio = document.getElementById('audio');
+
+    const moodToSongs = {
+      happy: ['songs/happy1.mp3', 'songs/happy2.mp3', 'songs/happy3.mp3', 'songs/happy4.mp3'],
+      sad: ['songs/sad1.mp3', 'songs/sad2.mp3'],
+      angry: ['songs/angry1.mp3', 'songs/angry2.mp3', 'songs/angry3.mp3'],
+      relaxed: ['songs/relaxed1.mp3'],
+      neutral: ['songs/neutral1.mp3']
+    };
+
+    const moodToEmoji = {
+      happy: '😄',
+      sad: '😢',
+      angry: '😠',
+      relaxed: '😌',
+      neutral: '😐'
+    };
+
+    let currentMood = null;
+    let currentIndex = 0;
+
+    function playSelectedMood() {
+      currentMood = moodSelect.value;
+      currentIndex = 0;
+      moodDisplay.innerText = `Mood: ${currentMood}`;
+      moodDisplay.style.opacity = '1';
+      emojiDisplay.innerText = moodToEmoji[currentMood] || '';
+      playCurrentSong();
+    }
+
+    function playCurrentSong() {
+      const playlist = moodToSongs[currentMood] || [];
+      if (playlist.length === 0) return;
+      audio.src = playlist[currentIndex];
+      audio.play();
+      currentSongDisplay.innerText = `Playing: ${playlist[currentIndex].split('/').pop()}`;
+    }
+
+    function playNextSong() {
+      const playlist = moodToSongs[currentMood] || [];
+      if (playlist.length === 0) return;
+      currentIndex = (currentIndex + 1) % playlist.length;
+      playCurrentSong();
+    }
+
+    function playPreviousSong() {
+      const playlist = moodToSongs[currentMood] || [];
+      if (playlist.length === 0) return;
+      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      playCurrentSong();
+    }
+
+    audio.addEventListener('ended', playNextSong);
+
+    audio.addEventListener('play', () => {
+      nowPlayingAnimation.classList.remove('hidden');
+    });
+
+    audio.addEventListener('pause', () => {
+      nowPlayingAnimation.classList.add('hidden');
+    });
+
+    audio.addEventListener('ended', () => {
+      nowPlayingAnimation.classList.add('hidden');
+    });
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
